@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
     private GLSurfaceView mView;
@@ -20,7 +24,17 @@ public class MainActivity extends Activity {
         FilterRenderer =new Renderer(this);
         mView.setRenderer(FilterRenderer);
 
+        Util.PiCoreLog("view w:"+mView.getWidth()+",h:"+mView.getHeight());
+
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        ImageButton button = (ImageButton)findViewById(R.id.bn_capture);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                FilterRenderer.TakePicture();
+            }
+        });
     }
 
     @Override
@@ -49,4 +63,7 @@ public class MainActivity extends Activity {
         }
         return super.onTouchEvent(event);
     }
+
+
+
 }

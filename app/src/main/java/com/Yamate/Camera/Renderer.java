@@ -235,4 +235,8 @@ public class Renderer implements GLSurfaceView.Renderer {
         return false;
     }
 
+    public void TakePicture()
+    {
+        mCamera.takePicture();
+    }
 }

@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ueder.cameratest.MainActivity" >
+    tools:context="com.Yamate.Camera.MainActivity" >
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -12,5 +12,15 @@
             android:id="@+id/gl_surface_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <ImageButton
+            android:id="@+id/bn_capture"
+            android:contentDescription="testImage"
+            style="@android:style/Widget.Material.Light.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|right"
+            android:padding="20dp"
+            android:src="@mipmap/capturing" />
     </FrameLayout>
 </RelativeLayout>
