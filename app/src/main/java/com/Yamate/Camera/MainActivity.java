@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
         mView.onResume();
     }
 
-    private static final int EFFECT_NUMBER=3;
+    private static final int EFFECT_NUMBER=5;
     private static int mSelectFilter=0;
     @Override
     public boolean onTouchEvent(MotionEvent event) {

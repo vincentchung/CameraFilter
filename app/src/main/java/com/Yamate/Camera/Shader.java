@@ -158,7 +158,6 @@ public class Shader {
         mRunningTimeHandle = GLES20.glGetUniformLocation(mGLProgram, "u_runningTime");
         Util.checkGlError("glGetUniformLocations");
 
-        Util.checkGlError("glGetUniformLocations");
 /*
            if(mViewfinderUse)
                GLES20.glVertexAttribPointer(mTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, mVFTextureVertices);

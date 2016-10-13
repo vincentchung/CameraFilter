@@ -148,6 +148,9 @@ public class Renderer implements GLSurfaceView.Renderer {
                 mFilterList.add(new Normal(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
                 mFilterList.add(new Sepia(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
                 mFilterList.add(new Duocolor(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
+
+                mFilterList.add(new Arique(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
+                mFilterList.add(new Emboss(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
                 mOputTexBuffer = ByteBuffer.allocateDirect(mGLlimitHeight * mGLlimitWidth * mPixelbytes);
                 mOputTexBuffer.order(ByteOrder.nativeOrder());
                 createFBO(mGLlimitHeight,mGLlimitHeight);
