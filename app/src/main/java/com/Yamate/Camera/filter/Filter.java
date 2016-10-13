@@ -36,6 +36,7 @@ public abstract class Filter {
     //fragment_shader file path
     String mVertext_glsl="simple_vertex_shader.glsl";
     String mFramgment_glsl="normal_fragment_shader.glsl";
+    String mFramgment_FR_glsl="normal_fragment_shader_full.glsl";
 
 	public abstract void onInit();
 	public abstract void onSelected();
@@ -47,7 +48,7 @@ public abstract class Filter {
 
 	public void onRenderBlockDone(ByteBuffer bdata,int index)
 	{
-		Util.RenderFullMapRawBuffer(bdata,index,mPictureWidth/2,mPictureHeight/2);
+		Util.RenderFullMapRawBuffer(bdata,mPictureWidth,mPictureHeight,index,mPictureWidth/2,mPictureHeight/2);
 	}
 
 	public boolean getGPUsupport()
@@ -94,6 +95,7 @@ public abstract class Filter {
 		//if(mVertexShader!=0)
 		{
 			filter_FR_shader=new Shader();
+			filter_FR_shader.setVF(false);
             filter_FR_shader.init(mVertext_glsl,mFramgment_glsl);
 			//filter_FR_shader.init(
 			//		mFRVertexShader,
@@ -145,6 +147,7 @@ public abstract class Filter {
 	{
 		float lTexelHeight = 1.0f/h; // screen resolution, not viewfinder resolution!
         float lTexelWidth = 1.0f/w;
+        setPictureSize(w,h);
 
 		if(filter_FR_shader==null)
 		{
@@ -185,10 +188,12 @@ public abstract class Filter {
 		Bitmap outBmp;
 		inputBmp=Util.decodingRegimage(data,data.length, area, width, height,overlap);
 		//transfer the size to pow of 2
+
 		outBmp=Util.drawGLsizeBmp(inputBmp);
 		inputBmp.recycle();
 		
 		return outBmp;
+        //return inputBmp;
 	}
 	protected void update_vertice(int index,float bW,float bH,float vW,float vH,float overlap)
 	{

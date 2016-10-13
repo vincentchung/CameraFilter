@@ -41,6 +41,7 @@ public class Util {
     static AtomicInteger mCameraFrameCount = new AtomicInteger();
     static AtomicInteger mReportedFrameCount = new AtomicInteger();
     static AtomicBoolean mInitCompleted = new AtomicBoolean();
+    static AtomicBoolean mCapturing = new AtomicBoolean();
 
 //managing GPU texture
     static class Res_buffer
@@ -421,10 +422,10 @@ public class Util {
         return (hit+1);
     }
 
-    public static void RenderFullMapRawBuffer(ByteBuffer bdata, int index, int dataw, int datah)
+    public static void RenderFullMapRawBuffer(ByteBuffer bdata,int fullImageW,int fullImageH, int index, int dataw, int datah)
     {
         ByteBuffer bmap = ByteBuffer.wrap(mFullres_array);
-        int read_line=mImageWidth;
+        int read_line=fullImageW;
         int mapping_offset=0;
         bmap.position(0);
         int data_overlap_offect=0;
@@ -438,15 +439,15 @@ public class Util {
                 //data_overlap_offect=0;
                 break;
             case 2:
-                mapping_offset=(mImageWidth/2)*2;
+                mapping_offset=(fullImageW/2)*2;
                 //data_overlap_offect=(PxOverlap)*2;
                 break;
             case 3:
-                mapping_offset=(mImageWidth)*(mImageHeight/2)*2;
+                mapping_offset=(fullImageW)*(fullImageH/2)*2;
                 //data_overlap_offect=(source_w*PxOverlap)*2;
                 break;
             case 4:
-                mapping_offset=((mImageWidth)*(mImageHeight/2)+(mImageWidth/2))*2;
+                mapping_offset=((fullImageW)*(fullImageH/2)+(fullImageW/2))*2;
                 //data_overlap_offect=(source_w*PxOverlap+PxOverlap)*2;
                 break;
         }
@@ -454,9 +455,9 @@ public class Util {
         bdata.position(0);
         Util.PiCoreLog("read offset:"+mapping_offset+",index:"+index);
         //copy the buffer line by line
-        for(int i=0;i<(mImageHeight/2);i++)
+        for(int i=0;i<(fullImageH/2);i++)
         {
-            System.arraycopy(bdata.array(), data_overlap_offect+(source_w*i)*2, mFullres_array,  mapping_offset+(mImageWidth*i)*2, read_line);
+            System.arraycopy(bdata.array(), data_overlap_offect+(source_w*i)*2, mFullres_array,  mapping_offset+(fullImageW*i)*2, read_line);
         }
     }
 
@@ -553,13 +554,19 @@ public class Util {
         return shader;
     }
 
-    public static int CreateGLprogram(String vertexSource, String fragmentSource)
+    public static int CreateGLprogram(String vertexSource, String fragmentSource,Boolean VF)
     {
         String vert="";
         String frag="";
 
         try {
-            frag="#define INPUT_VF 1\n"+getStringFromFileInAssets(mContext,fragmentSource);
+            if(VF)
+            {
+                frag="#define INPUT_VF 1\n"+getStringFromFileInAssets(mContext,fragmentSource);
+            }else
+            {
+                frag="#define TILE_MODE 1\n"+getStringFromFileInAssets(mContext,fragmentSource);
+            }
             vert=getStringFromFileInAssets(mContext,vertexSource);
         } catch (IOException e) {
             e.printStackTrace();
@@ -621,6 +628,38 @@ public class Util {
     private static String generateFileName() {
         String fileName = "ycamera_" + System.currentTimeMillis() + ".jpg";
         return fileName;
+    }
+
+    public static String ImageToFile(ByteArrayOutputStream baos)
+    {
+        String filename;
+
+        filename=generateFileName();
+
+        File dir = new File(STORE_DIR);
+        OutputStream outputStream = null;
+        File file = null;
+        if (!dir.exists())
+            dir.mkdirs();
+        file = new File(dir, filename);
+
+        FileOutputStream fos=null;
+        try {
+            fos = new FileOutputStream (file);
+
+            baos.writeTo(fos);
+        } catch(IOException ioe) {
+            // Handle exception here
+            ioe.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return file.getAbsolutePath();
     }
 
     public static String RawToJpeg(byte[] data,int w,int h)
@@ -704,14 +743,28 @@ public class Util {
         //BO.inPreferredConfig =Bitmap.Config.ARGB_8888;
         BO.inPreferredConfig =bmp_decoding_config;
 
+        Util.PiCoreLog("decode rect left:"+decode_rect.left+",top:"+decode_rect.top+",r:"+decode_rect.right+",b:"+decode_rect.bottom);
         try {
             BitmapRegionDecoder bmpr =BitmapRegionDecoder.newInstance(data, 0, length, true);
             bmp1=bmpr.decodeRegion(decode_rect, BO);
+            bmpr.recycle();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+
         return bmp1;
+    }
+
+    public static int uploadFRTextureFromBuffer(int width,int height,ByteBuffer imageBuffer,int FRtex)
+    {
+        imageBuffer.position(0);
+        PiCoreLog("uploadFRTextureFromBuffer w:"+width+",h:"+height);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        //using RGB565
+        int tex=Util.loadTextureFromBuffer( width, height,imageBuffer,false,FRtex,2);
+        return tex;
     }
 
     public static ByteBuffer GetPictureBuffer()
@@ -758,4 +811,11 @@ public class Util {
         return mInitCompleted.get();
     }
 
+    public static void setCapturing(boolean enabled) {
+        mCapturing.set(enabled);
+    }
+
+    public static boolean getCapturing() {
+        return mCapturing.get();
+    }
 }

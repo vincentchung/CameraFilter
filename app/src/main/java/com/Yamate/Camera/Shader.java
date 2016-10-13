@@ -29,33 +29,8 @@ public class Shader {
        int mViewWidth=0;
 
        private final float[] FULL_TEXTURE_VERTICES =
-           { 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
-
-
-           private static final float TEX_COORDS_ROTATION_0[] = {
-                   0.0f, 0.0f,
-                   0.0f, 1.0f,
-                   1.0f, 0.0f,
-                   1.0f, 1.0f
-           };
-    private static final float TEX_COORDS_ROTATION_90[] = {
-            1.0f, 0.0f,
-            0.0f, 0.0f,
-            1.0f, 1.0f,
-            0.0f, 1.0f
-    };
-    private static final float TEX_COORDS_ROTATION_180[] = {
-            1.0f, 1.0f,
-            1.0f, 0.0f,
-            0.0f, 1.0f,
-            0.0f, 0.0f
-    };
-    private static final float TEX_COORDS_ROTATION_270[] = {
-            0.0f, 1.0f,
-            1.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 0.0f
-    };
+               { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
+           //{ 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
     private float[] TEXTURE_VERTICES =
             { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
           //{ 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
@@ -168,17 +143,16 @@ public class Shader {
         Util.PiCoreLog(frag);
         //todo: changing the code here to create program index for the shader!!!
         //think: the name still keep using shader? or GLprogram?
-        //if(mViewfinderUse)
-            mGLProgram=Util.CreateGLprogram(vert,frag);
-        //else
-            //mGLProgram=Util.CreateGLprogram(1,effect_mode);
+        mGLProgram=Util.CreateGLprogram(vert,frag,mViewfinderUse);
 
 
 
         mViewfinderTexHandle = GLES20.glGetUniformLocation(mGLProgram, "s_viewfindertexture");
         Util.PiCoreLog("mViewfinderTexHandle:"+mViewfinderTexHandle);
         mTexCoordHandle = GLES20.glGetAttribLocation(mGLProgram, "a_inputTextureCoordinate");
+        Util.PiCoreLog("mTexCoordHandle:"+mTexCoordHandle);
         mFrameTexCoordHandle = GLES20.glGetAttribLocation(mGLProgram, "a_frameTextureCoordinate");
+        Util.PiCoreLog("mFrameTexCoordHandle:"+mFrameTexCoordHandle);
         mTriangleVerticesHandle = GLES20.glGetAttribLocation(mGLProgram, "a_vposition");
         mTransformHandle = GLES20.glGetUniformLocation(mGLProgram, "u_xformMat");
         mRunningTimeHandle = GLES20.glGetUniformLocation(mGLProgram, "u_runningTime");
@@ -191,8 +165,9 @@ public class Shader {
            else
                GLES20.glVertexAttribPointer(mTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, mFRTextureVertices);
  */
+
         GLES20.glVertexAttribPointer(mTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, mTextureVertices);
-        //GLES20.glVertexAttribPointer(mFrameTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, mFullTextureVertices);
+        //GLES20.glVertexAttribPointer(mFrameTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, mTextureVertices);
         GLES20.glVertexAttribPointer(mTriangleVerticesHandle, 2, GLES20.GL_FLOAT, false, 0, mQuadVertices);
         Util.checkGlError("glVertexAttribPointer");
 

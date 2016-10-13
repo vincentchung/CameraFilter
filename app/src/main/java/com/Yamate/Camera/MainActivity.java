@@ -3,6 +3,7 @@ package com.Yamate.Camera;
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -10,9 +11,16 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class MainActivity extends Activity {
     private GLSurfaceView mView;
     private Renderer FilterRenderer=null;
+    private static ByteArrayOutputStream mYcameraOutputStream=null;
+    private final Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +40,12 @@ public class MainActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                if(mYcameraOutputStream==null)
+                    mYcameraOutputStream =new ByteArrayOutputStream();
+
+                Util.setCapturing(true);
                 FilterRenderer.TakePicture();
+                mHandler.postDelayed(mYcameraRenderingTimer, 200);
             }
         });
     }
@@ -64,6 +77,23 @@ public class MainActivity extends Activity {
         return super.onTouchEvent(event);
     }
 
+    //pic timer for saving the last result
+    private Runnable mYcameraRenderingTimer = new Runnable() {
+        public void run() {
+            if(Util.getCapturing())
+            {
+                mHandler.postDelayed(mYcameraRenderingTimer, 200);
+            }else
+            {
+                //done the rendering..
+                mYcameraOutputStream.reset();
+                if(FilterRenderer.getRenderResult(mYcameraOutputStream))
+                {
+                    Util.ImageToFile(mYcameraOutputStream);
+                }
 
+            }
+        }
+    };
 
 }

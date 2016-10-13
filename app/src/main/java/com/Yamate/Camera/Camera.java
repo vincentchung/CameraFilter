@@ -72,8 +72,9 @@
 
         import static com.Yamate.Camera.Camera.CameraRotation.*;
 
-public class Camera{
+public class Camera {
     enum CameraRotation {ROTATION_0, ROTATION_90, ROTATION_180, ROTATION_270}
+
     /**
      * Conversion from screen rotation to JPEG orientation.
      */
@@ -102,7 +103,7 @@ public class Camera{
     private int mTextureID;
     private SurfaceTexture mSurfaceTexture;
     private boolean mInitialized = false;
-    private CameraRotation mCameraRotation=ROTATION_90;
+    private CameraRotation mCameraRotation = ROTATION_90;
     /**
      * Camera state: Showing camera preview.
      */
@@ -138,6 +139,7 @@ public class Camera{
      */
     private static final int MAX_PREVIEW_HEIGHT = 1080;
 
+    private byte[] captureBuffer = null;
 
 
     public Camera(Activity activity, int textureID) {
@@ -145,6 +147,7 @@ public class Camera{
         mTextureID = textureID;
         mFile = new File(mActivity.getExternalFilesDir(null), "pic.jpg");
     }
+
     /**
      * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a
      * {@link TextureView}.
@@ -197,6 +200,8 @@ public class Camera{
      * The {@link android.util.Size} of camera preview.
      */
     private Size mPreviewSize;
+
+    private Size mCaptureSize;
 
     /**
      * {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its state.
@@ -252,6 +257,14 @@ public class Camera{
      */
     private File mFile;
 
+    //
+    private int mWaitingProcessPic = 0;
+
+    public byte[] getCapturedBuffer()
+    {
+        return captureBuffer;
+    }
+
     /**
      * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
      * still image is ready to be saved.
@@ -261,7 +274,16 @@ public class Camera{
 
         @Override
         public void onImageAvailable(ImageReader reader) {
-            mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
+
+
+            ByteBuffer buffer = reader.acquireNextImage().getPlanes()[0].getBuffer();
+
+            captureBuffer = new byte[buffer.remaining()];
+            buffer.get(captureBuffer);
+            Util.setCapturing(true);
+
+            //mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
+            mWaitingProcessPic++;
         }
 
     };
@@ -461,14 +483,15 @@ public class Camera{
                  Util.PiCoreLog("output w:"+map.getOutputSizes(SurfaceTexture.class)[0].getWidth()+",h:"+map.getOutputSizes(SurfaceTexture.class)[0].getHeight());
 
                 // For still image captures, we use the largest available size.
+
                 Size largest = Collections.max(
                         Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
                         new CompareSizesByArea());
                 mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(),
-                        ImageFormat.JPEG, /*maxImages*/2);
+                        ImageFormat.JPEG, 2);
                 mImageReader.setOnImageAvailableListener(
                         mOnImageAvailableListener, mBackgroundHandler);
-
+                mCaptureSize=new Size(largest.getWidth(), largest.getHeight());
                 // Find out if we need to swap dimension to get the preview size relative to sensor
                 // coordinate.
                 int displayRotation = activity.getWindowManager().getDefaultDisplay().getRotation();
@@ -530,6 +553,16 @@ public class Camera{
                 }
                 Util.PiCoreLog("mPreviewSize w:"+mPreviewSize.getWidth()+",h:"+mPreviewSize.getHeight());
 
+                //using preview size to take image
+                /*
+                Size largest = Collections.max(
+                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
+                        new CompareSizesByArea());
+                mImageReader = ImageReader.newInstance(mPreviewSize.getWidth(), mPreviewSize.getHeight(),
+                        ImageFormat.JPEG, 2);
+                mImageReader.setOnImageAvailableListener(
+                        mOnImageAvailableListener, mBackgroundHandler);
+*/
                 // We fit the aspect ratio of TextureView to the size of preview we picked.
                 /*
                 int orientation = getResources().getConfiguration().orientation;
@@ -877,9 +910,11 @@ public class Camera{
         @Override
         public void run() {
             ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
-            byte[] bytes = new byte[buffer.remaining()];
+
+            byte bytes[] = new byte[buffer.remaining()];
             buffer.get(bytes);
             FileOutputStream output = null;
+            Util.PiCoreLog("file w:"+mImage.getWidth()+",h:"+mImage.getHeight()+",format:"+mImage.getFormat());
             try {
                 output = new FileOutputStream(mFile);
                 output.write(bytes);
@@ -895,6 +930,7 @@ public class Camera{
                     }
                 }
             }
+            Util.setCapturing(true);
         }
 
     }
@@ -934,6 +970,9 @@ public class Camera{
         return mPreviewSize;
     }
 
+    public Size getCaptureSize() {
+        return mCaptureSize;
+    }
 
     public void setCameraRotation() {
         if (!mInitialized) {
@@ -968,5 +1007,18 @@ public class Camera{
         return mCameraRotation;
     }
 
+    public File getImageFile()
+    {
+        return mFile;
+    }
 
+    public int getCaptureFlag()
+    {
+        return mWaitingProcessPic;
+    }
+
+    public void setCaptureFlag()
+    {
+        mWaitingProcessPic++;
+    }
 }
