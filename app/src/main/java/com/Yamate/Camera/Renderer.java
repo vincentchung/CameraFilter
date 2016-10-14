@@ -154,6 +154,7 @@ public class Renderer implements GLSurfaceView.Renderer {
                 mFilterList.add(new Halftone(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
                 mFilterList.add(new Cartoon(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
                 mFilterList.add(new NightVision(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight(),R.mipmap.tex_noise01_512512));
+                mFilterList.add(new MagicPen(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
                 mOputTexBuffer = ByteBuffer.allocateDirect(mGLlimitHeight * mGLlimitWidth * mPixelbytes);
                 mOputTexBuffer.order(ByteOrder.nativeOrder());
                 createFBO(mGLlimitHeight,mGLlimitHeight);
