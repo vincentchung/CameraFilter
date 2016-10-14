@@ -21,6 +21,8 @@ public class MainActivity extends Activity {
     private Renderer FilterRenderer=null;
     private static ByteArrayOutputStream mYcameraOutputStream=null;
     private final Handler mHandler = new Handler();
+    private Camera mCamera=null;
+    private FilterList filters=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
