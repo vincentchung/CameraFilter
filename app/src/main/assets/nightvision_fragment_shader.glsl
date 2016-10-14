@@ -11,6 +11,7 @@
 /**
   * Generic precompiler settings and uniform sampler variables
   */
+  #define OPENGL_ES 1
 #ifdef OPENGL_ES
   #extension GL_OES_EGL_image_external : require
   precision mediump float;

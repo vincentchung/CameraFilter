@@ -14,7 +14,7 @@ public class NightVision extends Filter {
     }
     void init()
     {
-        mFramgment_glsl="duocolor_fragment_shader.glsl";
+        mFramgment_glsl="nightvision_fragment_shader.glsl";
         filter_shader=new Shader();
         filter_shader.init(mVertext_glsl,mFramgment_glsl);
         int handle3=filter_shader.init_addtexName("s_noisetexture");
@@ -44,6 +44,15 @@ public class NightVision extends Filter {
             filter_FR_shader.setVF(false);
         }
     }
+    @Override
+    public void onDraw()
+    {
+        if(!frame_load)
+        {
+            Util.loadGLTextureFromResource(mNoise_id,  true,1,false);
+            frame_load=true;
+        }
 
+    }
 }
 
