@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
         mView.onResume();
     }
 
-    private static final int EFFECT_NUMBER=5;
+    //private static final int EFFECT_NUMBER=5;
     private static int mSelectFilter=0;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -71,8 +71,9 @@ public class MainActivity extends Activity {
         if(event.getAction()==MotionEvent.ACTION_UP)
         {
             //switching filter
+            int total_num=FilterRenderer.getFilterSize();
             mSelectFilter++;
-            FilterRenderer.switchFilter(mSelectFilter%EFFECT_NUMBER);
+            FilterRenderer.switchFilter(mSelectFilter%total_num);
         }
         return super.onTouchEvent(event);
     }

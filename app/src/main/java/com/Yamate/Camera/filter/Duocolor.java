@@ -26,7 +26,7 @@ public class Duocolor extends Filter {
         Util.setShaderVariableF(mGLProgram, "u_keyColorB", 0.0f);
         Util.setShaderVariableF(mGLProgram, "u_threshold", 0.8f); // 0.345f);
         Util.setShaderVariableF(mGLProgram, "u_slope", 0.8f); // 0.5f);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        //GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
         //Util.loadGLTextureFromResource(R.drawable.texture, PicoreOpenGLTestActivity.getAppContext(), true);
     }
     @Override

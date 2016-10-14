@@ -151,6 +151,8 @@ public class Renderer implements GLSurfaceView.Renderer {
 
                 mFilterList.add(new Arique(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
                 mFilterList.add(new Emboss(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
+                mFilterList.add(new Halftone(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
+                mFilterList.add(new Cartoon(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
                 mOputTexBuffer = ByteBuffer.allocateDirect(mGLlimitHeight * mGLlimitWidth * mPixelbytes);
                 mOputTexBuffer.order(ByteOrder.nativeOrder());
                 createFBO(mGLlimitHeight,mGLlimitHeight);
@@ -397,6 +399,10 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     }
 
+    public int getFilterSize()
+    {
+        return mFilterList.size();
+    }
 
     public boolean switchFilter(int e)
     {
