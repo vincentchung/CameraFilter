@@ -27,6 +27,8 @@ import java.util.ArrayList;
 
 public class FilterList {
     private ArrayList<Filter> mFilterList = new ArrayList<Filter>();
+    int mCurrentFilter=0;
+
     public FilterList(int w,int h)
     {
         mFilterList.add(new Normal(w,h));
@@ -41,8 +43,39 @@ public class FilterList {
         mFilterList.add(new Sketch(w,h));
         mFilterList.add(new Hue(w,h));
     }
+
     public ArrayList<Filter> getFilters()
     {
         return mFilterList;
+    }
+
+    public Filter getCurrnectFilter()
+    {
+        return mFilterList.get(mCurrentFilter);
+    }
+
+    public void setCurrentFilter(int index)
+    {
+        mCurrentFilter=index;
+    }
+
+    public void setNextFilter()
+    {
+        mCurrentFilter++;
+
+        if(mCurrentFilter==mFilterList.size())
+            mCurrentFilter=0;
+
+    }
+
+    public int getFilterSize()
+    {
+        return mFilterList.size();
+    }
+
+    public void setFilter(int index)
+    {
+        mCurrentFilter=index;
+
     }
 }

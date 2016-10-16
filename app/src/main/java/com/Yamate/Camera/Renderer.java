@@ -35,8 +35,10 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     //filter api part
     //private Filter filter[]=null;
-    int mCurrentFilter=0;
-    ArrayList<Filter> mFilterList = new ArrayList<Filter>();
+    //int mCurrentFilter=0;
+    //ArrayList<Filter> mFilterList = new ArrayList<Filter>();
+
+    private FilterList mFilters=null;
     private int mViewfinderTextureName=-1;
     private SurfaceTexture mSurfaceTexture=null;
     private int mLastCameraFrameCount;
@@ -145,16 +147,9 @@ public class Renderer implements GLSurfaceView.Renderer {
                 mCamera.setCameraRotation();
                 setConfig();
                 //make sure camera is ready and config the viewfinder size
-                mFilterList.add(new Normal(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
-                mFilterList.add(new Sepia(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
-                mFilterList.add(new Duocolor(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
 
-                mFilterList.add(new Arique(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
-                mFilterList.add(new Emboss(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
-                mFilterList.add(new Halftone(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
-                mFilterList.add(new Cartoon(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
-                mFilterList.add(new NightVision(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight(),R.mipmap.tex_noise01_512512));
-                mFilterList.add(new MagicPen(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight()));
+
+                mFilters=new FilterList(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight());
                 mOputTexBuffer = ByteBuffer.allocateDirect(mGLlimitHeight * mGLlimitWidth * mPixelbytes);
                 mOputTexBuffer.order(ByteOrder.nativeOrder());
                 createFBO(mGLlimitHeight,mGLlimitHeight);
@@ -169,7 +164,7 @@ public class Renderer implements GLSurfaceView.Renderer {
             Util.PiCoreLog("filter not ready yet...");
             return;
         }
-        Filter filter=mFilterList.get(mCurrentFilter);
+        Filter filter=mFilters.getCurrnectFilter();
 
         filter.onDrawing();
         //check if camera is on done in capturing....
@@ -289,7 +284,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     private boolean renderToFramebuffer() {
 
-        Shader currentShader=mFilterList.get(mCurrentFilter).filter_FR_shader;
+        Shader currentShader=mFilters.getCurrnectFilter().filter_FR_shader;
 
         //GLES20.glViewport(0, 0, render_bmp.getWidth(), render_bmp.getHeight()); // set viewport to framebuffer size
         GLES20.glViewport(0, 0, mCaptureWidth/2, mCaptureHeight/2); // set viewport to framebuffer size
@@ -403,12 +398,12 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     public int getFilterSize()
     {
-        return mFilterList.size();
+        return mFilters.getFilterSize();
     }
 
     public boolean switchFilter(int e)
     {
-        if(mCurrentFilter!=e)
+        //if(mCurrentFilter!=e)
         {
             //if(Util.getCapturing())
             //    return false;
@@ -417,15 +412,15 @@ public class Renderer implements GLSurfaceView.Renderer {
 
             Util.setInitCompleted(false);
 
-            mFilterList.get(mCurrentFilter).unSelected();
-            mCurrentFilter=e;
-            mFilterList.get(mCurrentFilter).setFiliterEnable();
+            mFilters.getCurrnectFilter().unSelected();
+            mFilters.setFilter(e);
+            mFilters.getCurrnectFilter().setFiliterEnable();
 
             GLES20.glFlush();
             Util.setInitCompleted(true);
             return true;
         }
-        return false;
+        //return false;
     }
 
     public void TakePicture()
@@ -435,6 +430,6 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     public boolean getRenderResult(ByteArrayOutputStream outputStream)
     {
-        return mFilterList.get(mCurrentFilter).renderCompressResult(outputStream);
+        return mFilters.getCurrnectFilter().renderCompressResult(outputStream);
     }
 }
