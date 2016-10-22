@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.media.ImageReader;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +25,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import android.support.v13.app.FragmentCompat;
 
 public class MainActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback, Renderer.RendererListener{
@@ -73,7 +76,8 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
 
                 Util.setCapturing(true);
                 //FilterRenderer.TakePicture();
-                mHandler.postDelayed(mYcameraRenderingTimer, 200);
+                //taking a capturing...
+                mCamera.takePicture();
             }
         });
     }
@@ -106,24 +110,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
         return super.onTouchEvent(event);
     }
 
-    //pic timer for saving the last result
-    private Runnable mYcameraRenderingTimer = new Runnable() {
-        public void run() {
-            if(Util.getCapturing())
-            {
-                mHandler.postDelayed(mYcameraRenderingTimer, 200);
-            }else
-            {
-                //done the rendering..
-                mYcameraOutputStream.reset();
-                if(mFilterRenderer.getRenderResult(mYcameraOutputStream))
-                {
-                    Util.ImageToFile(mYcameraOutputStream);
-                }
 
-            }
-        }
-    };
 
     //for adding premission request
 
@@ -167,6 +154,8 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
     @Override
     public void onRenderSurfaceCreated(int textName) {
         mCamera = new Camera(this, textName);
+        mCamera.setCaptueImageListener(mOnCameraImageAvailableListener);
+
         mCamera.open();
 
     }
@@ -246,5 +235,23 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
                     .create();
         }
     }
+
+    private final ImageReader.OnImageAvailableListener mOnCameraImageAvailableListener
+            = new ImageReader.OnImageAvailableListener() {
+
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+
+            ByteBuffer buffer = reader.acquireNextImage().getPlanes()[0].getBuffer();
+
+            byte captureBuffer[] = new byte[buffer.remaining()];
+            buffer.get(captureBuffer);
+            mFilterRenderer.setRenderToBuff(mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight(),captureBuffer);
+            Util.setCapturing(true);
+            Util.PiCoreLog("onImageAvailable");
+            //mWaitingProcessPic++;
+        }
+
+    };
 
 }

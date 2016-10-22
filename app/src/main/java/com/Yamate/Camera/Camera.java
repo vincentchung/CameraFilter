@@ -270,6 +270,7 @@ public class Camera {
      * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
      * still image is ready to be saved.
      */
+    /*
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener
             = new ImageReader.OnImageAvailableListener() {
 
@@ -283,12 +284,12 @@ public class Camera {
             buffer.get(captureBuffer);
             Util.setCapturing(true);
 
-            //mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
             mWaitingProcessPic++;
         }
 
     };
-
+*/
+    private ImageReader.OnImageAvailableListener mOnImageAvailableListener=null;
     /**
      * {@link CaptureRequest.Builder} for the camera preview
      */
@@ -1028,5 +1029,10 @@ public class Camera {
     public void setCaptureFlag()
     {
         mWaitingProcessPic++;
+    }
+
+    public void setCaptueImageListener(ImageReader.OnImageAvailableListener listner)
+    {
+        mOnImageAvailableListener=listner;
     }
 }
