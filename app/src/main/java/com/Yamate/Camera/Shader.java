@@ -166,7 +166,7 @@ public class Shader {
  */
 
         GLES20.glVertexAttribPointer(mTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, mTextureVertices);
-        //GLES20.glVertexAttribPointer(mFrameTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, mTextureVertices);
+        //GLES20.glVertexAttribPointer(mFrameTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, mFullTextureVertices);
         GLES20.glVertexAttribPointer(mTriangleVerticesHandle, 2, GLES20.GL_FLOAT, false, 0, mQuadVertices);
         Util.checkGlError("glVertexAttribPointer");
 

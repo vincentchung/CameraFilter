@@ -26,17 +26,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import android.support.v13.app.FragmentCompat;
 
-public class MainActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback{
+public class MainActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback, Renderer.RendererListener{
     private GLSurfaceView mView;
-    private Renderer FilterRenderer=null;
+    private Renderer mFilterRenderer=null;
     private static ByteArrayOutputStream mYcameraOutputStream=null;
     private final Handler mHandler = new Handler();
-    private Camera mCamera=null;
+    private Camera mCamera;
+    private boolean mCameraInit=false;
     private FilterList filters=null;
 
     //adding premission request
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String FRAGMENT_DIALOG = "dialog";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +55,10 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
 
         mView = (GLSurfaceView)findViewById(R.id.gl_surface_view);
         mView.setEGLContextClientVersion(2);
-        FilterRenderer =new Renderer(this);
-        mView.setRenderer(FilterRenderer);
+        mFilterRenderer =new Renderer(this);
+        mFilterRenderer.setListener(this);
+        mView.setRenderer(mFilterRenderer);
+
 
         Util.PiCoreLog("view w:"+mView.getWidth()+",h:"+mView.getHeight());
 
@@ -68,7 +72,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
                     mYcameraOutputStream =new ByteArrayOutputStream();
 
                 Util.setCapturing(true);
-                FilterRenderer.TakePicture();
+                //FilterRenderer.TakePicture();
                 mHandler.postDelayed(mYcameraRenderingTimer, 200);
             }
         });
@@ -95,9 +99,9 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
         if(event.getAction()==MotionEvent.ACTION_UP)
         {
             //switching filter
-            int total_num=FilterRenderer.getFilterSize();
+            int total_num=mFilterRenderer.getFilterSize();
             mSelectFilter++;
-            FilterRenderer.switchFilter(mSelectFilter%total_num);
+            mFilterRenderer.switchFilter(mSelectFilter%total_num);
         }
         return super.onTouchEvent(event);
     }
@@ -112,7 +116,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
             {
                 //done the rendering..
                 mYcameraOutputStream.reset();
-                if(FilterRenderer.getRenderResult(mYcameraOutputStream))
+                if(mFilterRenderer.getRenderResult(mYcameraOutputStream))
                 {
                     Util.ImageToFile(mYcameraOutputStream);
                 }
@@ -152,6 +156,34 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    @Override
+    public void onRenderBufferDone() {
+
+    }
+
+    @Override
+    public void onRenderSurfaceCreated(int textName) {
+        mCamera = new Camera(this, textName);
+        mCamera.open();
+
+    }
+
+    @Override
+    public void onRenderDraw() {
+
+        if(!mCameraInit)
+        {
+            if(mCamera.getTexture()!=null)
+            {
+                mFilterRenderer.setViewFinderSize(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight());
+                mCamera.setCameraRotation();
+                mFilterRenderer.setSurfaceTexture(mCamera.getTexture());
+                mFilterRenderer.setCameraConfig(true);
+                mCameraInit=true;
+            }
         }
     }
 

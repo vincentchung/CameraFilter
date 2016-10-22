@@ -158,6 +158,7 @@ public class Camera {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
             openCamera(width, height);
+            Util.addCameraFrameCount();
         }
 
         @Override
@@ -961,6 +962,13 @@ public class Camera {
         if (mInitialized) {
             mSurfaceTexture.updateTexImage();
         }
+    }
+
+    public SurfaceTexture getTexture() {
+        if (mInitialized) {
+            return mSurfaceTexture;
+        }
+        return null;
     }
 
     public boolean getInitialized() {

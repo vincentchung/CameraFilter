@@ -8,7 +8,7 @@ void main() {
 gl_Position = a_vposition;
 #ifdef INPUT_VF
 v_textureCoordinate = vec2(u_xformMat * vec4(a_inputTextureCoordinate, 1.0, 1.0));
-v_frameCoordinate = vec2(u_xformMat * vec4(a_frameTextureCoordinate, 1.0, 1.0));;
+v_frameCoordinate = vec2(u_xformMat * vec4(a_frameTextureCoordinate, 1.0, 1.0));
 #else
 v_textureCoordinate = a_inputTextureCoordinate;
 v_frameCoordinate = a_frameTextureCoordinate;

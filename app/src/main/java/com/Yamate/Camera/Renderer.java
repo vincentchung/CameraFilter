@@ -30,8 +30,9 @@ import static android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
 
 public class Renderer implements GLSurfaceView.Renderer {
     private Activity mActivity;
-    private Camera mCamera;
+    //private Camera mCamera;
     private boolean mConfigured = false;
+    private boolean mCameraConfig = false;
 
     //filter api part
     //private Filter filter[]=null;
@@ -55,6 +56,12 @@ public class Renderer implements GLSurfaceView.Renderer {
     int mFbSizeY;
     int FR_tex=-1;
 
+    int mViewFinderWidth=0;
+    int mViewFinderHeight=0;
+    byte mCapturedata[]=null;
+    //
+    private RendererListener mListener=null;
+
     public Renderer(Activity activity) {
         mActivity = activity;
         Util.PiCoreLog("Renderer");
@@ -74,16 +81,16 @@ public class Renderer implements GLSurfaceView.Renderer {
             mViewfinderTextureName = textures[0];
             Util.PiCoreLog("Viewfinder texture name " + mViewfinderTextureName);
         }
+
+/*
         mSurfaceTexture = new SurfaceTexture(mViewfinderTextureName);
         mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                //mCameraFrameCount.incrementAndGet();
                 Util.addCameraFrameCount();
-                //Util.PiCoreLog("onFrameAvailable");
             }
         });
-
+*/
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mViewfinderTextureName);
         GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_LINEAR);
         GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
@@ -95,9 +102,14 @@ public class Renderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         create_surfaceTexture();
+
+        if(mListener!=null)
+        {
+            mListener.onRenderSurfaceCreated(mViewfinderTextureName);
+        }
         //open camera
-        mCamera = new Camera(mActivity, mViewfinderTextureName);
-        mCamera.open();
+        //mCamera = new Camera(mActivity, mViewfinderTextureName);
+        //mCamera.open();
     }
 
     public void createFBO(int sizeX, int sizeY) {
@@ -142,18 +154,23 @@ public class Renderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
+        if(mListener!=null)
+        {
+            mListener.onRenderDraw();
+        }
+
         if (!mConfigured) {
-            if (mConfigured = mCamera.getInitialized()) {
-                mCamera.setCameraRotation();
+            if (mCameraConfig)
+            {
+                //mCamera.setCameraRotation();
                 setConfig();
                 //make sure camera is ready and config the viewfinder size
-
-
-                mFilters=new FilterList(mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight());
+                mFilters=new FilterList(mViewFinderWidth,mViewFinderHeight);
                 mOputTexBuffer = ByteBuffer.allocateDirect(mGLlimitHeight * mGLlimitWidth * mPixelbytes);
                 mOputTexBuffer.order(ByteOrder.nativeOrder());
                 createFBO(mGLlimitHeight,mGLlimitHeight);
                 Util.setInitCompleted(true);
+                mConfigured=true;
             } else {
                 return;
             }
@@ -173,20 +190,7 @@ public class Renderer implements GLSurfaceView.Renderer {
             if(Util.getCapturing())
             {
                 //using file path
-                byte mCapturedata[]=mCamera.getCapturedBuffer();
-
-                /*
-                File file = new File(mActivity.getExternalFilesDir(null), "pic.jpg");
-
-                try {
-                    FileInputStream input=new FileInputStream(file);
-                    mCapturedata=new byte[(int)file.length()];
-                    input.read(mCapturedata);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }catch (IOException e) {
-                    e.printStackTrace();
-                }*/
+                //byte mCapturedata[]=mCamera.getCapturedBuffer();
 
                 if(mCapturedata==null)
                 {
@@ -195,9 +199,6 @@ public class Renderer implements GLSurfaceView.Renderer {
                     //render2ndpassbuffer();
                     return;
                 }
-
-                mCaptureWidth=mCamera.getCaptureSize().getWidth();
-                mCaptureHeight=mCamera.getCaptureSize().getHeight();
 
                 filter.onTakePicture(mCaptureWidth, mCaptureHeight);
 
@@ -236,7 +237,6 @@ public class Renderer implements GLSurfaceView.Renderer {
                             GLES20.glReadPixels(0, 0, mCaptureWidth/t,mCaptureHeight/t, GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, mOputTexBuffer);
                         }else
                         {
-                            //GLES20.glReadPixels(0, 0, mCaptureWidth/t,mCaptureHeight/t, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mOputTexBuffer);
                             GLES20.glReadPixels(0, 0, mCaptureWidth/t,mCaptureHeight/t, GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, mOputTexBuffer);
                         }
 
@@ -269,12 +269,13 @@ public class Renderer implements GLSurfaceView.Renderer {
                 GLES20.glClearColor(.0f, .0f, .0f, 1.0f);
                 GLES20.glClear( GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
                 //reset the view port
-                GLES20.glViewport(0, 0, mCamera.getCameraSize().getWidth(),mCamera.getCameraSize().getHeight());
+                GLES20.glViewport(0, 0, mViewFinderWidth,mViewFinderHeight);
                 Util.setCapturing(false);
                 return;
             }
         }
-        mCamera.updateTexture();
+        //mCamera.updateTexture();
+        mSurfaceTexture.updateTexImage();
         //Util.PiCoreLog("normalRender VF");
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         //render to viewfinder
@@ -325,12 +326,12 @@ public class Renderer implements GLSurfaceView.Renderer {
 */
         Point displaySize = new Point();
         mActivity.getWindowManager().getDefaultDisplay().getSize(displaySize);
-        Size textureSize = mCamera.getCameraSize();
+        //Size textureSize = mCamera.getCameraSize();
         Point textureOrigin = new Point(
-                (displaySize.x - textureSize.getWidth()) / 2,
-                (displaySize.y - textureSize.getHeight()) / 2);
+                (displaySize.x - mViewFinderWidth) / 2,
+                (displaySize.y - mViewFinderHeight) / 2);
 
-        GLES20.glViewport(0, 0, textureSize.getWidth(), textureSize.getHeight());
+        GLES20.glViewport(0, 0, mViewFinderWidth, mViewFinderHeight);
         }
 
     private void normalRender(Shader currentShader) {
@@ -351,7 +352,8 @@ public class Renderer implements GLSurfaceView.Renderer {
             int lFrameTexCoordHandle=currentShader.getFrameTexCoordHandle();
             int lRunningTimeHandle=currentShader.getRunningTimeHandle();
             int cameraFrameCount = Util.getCameraFrameCount();
-            if (mLastCameraFrameCount != cameraFrameCount) {
+            if (mLastCameraFrameCount != cameraFrameCount)
+            {
                 //Util.PiCoreLog("update texture");
                 Util.addReportedFrameCount();
                 mSurfaceTexture.updateTexImage();
@@ -423,13 +425,49 @@ public class Renderer implements GLSurfaceView.Renderer {
         //return false;
     }
 
-    public void TakePicture()
+    public void setSurfaceTexture(SurfaceTexture surf)
     {
-        mCamera.takePicture();
+        mSurfaceTexture=surf;
+    }
+
+    public void setRenderToBuff(int w,int h,byte data[])
+    {
+        mCapturedata=data;
+        mCaptureWidth=w;
+        mCaptureHeight=h;
     }
 
     public boolean getRenderResult(ByteArrayOutputStream outputStream)
     {
-        return mFilters.getCurrnectFilter().renderCompressResult(outputStream);
+        //byte data[]=mCamera.getCapturedBuffer();
+
+        outputStream.write(mCapturedata,0,mCapturedata.length);
+        return true;
+        //return mFilters.getCurrnectFilter().renderCompressResult(outputStream);
     }
+
+    //adding for setting up the interface for camera and avtivity
+    public void setListener(RendererListener listener)
+    {
+        mListener=listener;
+    }
+    public void setViewFinderSize(int w,int h)
+    {
+        mViewFinderWidth=w;
+        mViewFinderHeight=h;
+    }
+    public void setCameraConfig(boolean b)
+    {
+        mCameraConfig=b;
+    }
+
+    //Listener of renderer
+
+    public interface RendererListener {
+        void onRenderBufferDone();
+
+        void onRenderSurfaceCreated(int textName);
+        void onRenderDraw();
+    }
+
 }
