@@ -41,6 +41,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
     //adding premission request
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String FRAGMENT_DIALOG = "dialog";
+    private byte mCaptureBuffer[]=null;
 
 
     @Override
@@ -147,8 +148,10 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
     }
 
     @Override
-    public void onRenderBufferDone() {
-
+    public void onRenderBufferDone(ByteBuffer buffer) {
+        //mYcameraOutputStream.write(mCaptureBuffer,0,mCaptureBuffer.length);
+        mCaptureBuffer=null;
+        Util.RawToJpeg(buffer.array(),mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight());
     }
 
     @Override
@@ -244,9 +247,9 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
 
             ByteBuffer buffer = reader.acquireNextImage().getPlanes()[0].getBuffer();
 
-            byte captureBuffer[] = new byte[buffer.remaining()];
-            buffer.get(captureBuffer);
-            mFilterRenderer.setRenderToBuff(mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight(),captureBuffer);
+            mCaptureBuffer = new byte[buffer.remaining()];
+            buffer.get(mCaptureBuffer);
+            mFilterRenderer.setRenderToBuff(mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight(),mCaptureBuffer);
             Util.setCapturing(true);
             Util.PiCoreLog("onImageAvailable");
             //mWaitingProcessPic++;

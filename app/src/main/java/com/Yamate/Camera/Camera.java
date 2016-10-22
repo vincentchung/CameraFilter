@@ -485,7 +485,7 @@ public class Camera {
                  Util.PiCoreLog("output w:"+map.getOutputSizes(SurfaceTexture.class)[0].getWidth()+",h:"+map.getOutputSizes(SurfaceTexture.class)[0].getHeight());
 
                 // For still image captures, we use the largest available size.
-
+/*
                 Size largest = Collections.max(
                         Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
                         new CompareSizesByArea());
@@ -494,6 +494,7 @@ public class Camera {
                 mImageReader.setOnImageAvailableListener(
                         mOnImageAvailableListener, mBackgroundHandler);
                 mCaptureSize=new Size(largest.getWidth(), largest.getHeight());
+*/
                 // Find out if we need to swap dimension to get the preview size relative to sensor
                 // coordinate.
                 int displayRotation = activity.getWindowManager().getDefaultDisplay().getRotation();
@@ -556,7 +557,7 @@ public class Camera {
                 Util.PiCoreLog("mPreviewSize w:"+mPreviewSize.getWidth()+",h:"+mPreviewSize.getHeight());
 
                 //using preview size to take image
-                /*
+
                 Size largest = Collections.max(
                         Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
                         new CompareSizesByArea());
@@ -564,7 +565,7 @@ public class Camera {
                         ImageFormat.JPEG, 2);
                 mImageReader.setOnImageAvailableListener(
                         mOnImageAvailableListener, mBackgroundHandler);
-*/
+                mCaptureSize=new Size(mPreviewSize.getWidth(), mPreviewSize.getHeight());
                 // We fit the aspect ratio of TextureView to the size of preview we picked.
                 /*
                 int orientation = getResources().getConfiguration().orientation;

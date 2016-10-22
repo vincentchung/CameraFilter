@@ -2,6 +2,7 @@ package com.Yamate.Camera;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
@@ -168,7 +169,8 @@ public class Renderer implements GLSurfaceView.Renderer {
                 mFilters=new FilterList(mViewFinderWidth,mViewFinderHeight);
                 mOputTexBuffer = ByteBuffer.allocateDirect(mGLlimitHeight * mGLlimitWidth * mPixelbytes);
                 mOputTexBuffer.order(ByteOrder.nativeOrder());
-                createFBO(mGLlimitHeight,mGLlimitHeight);
+                //createFBO(mGLlimitHeight,mGLlimitHeight);
+                createFBO(mViewFinderWidth,mViewFinderHeight);
                 Util.setInitCompleted(true);
                 mConfigured=true;
             } else {
@@ -204,22 +206,26 @@ public class Renderer implements GLSurfaceView.Renderer {
 
                 if(filter.getGPUsupport())
                 {
-                    int blocks=filter.getBlocknumber();
-                    for(int i=1;i<(blocks+1);i++)
+                    //int blocks=filter.getBlocknumber();
+                    //for(int i=1;i<(blocks+1);i++)
                     {
                         Util.PiCoreLog("capturing:w:"+mCaptureWidth+",h:"+mCaptureHeight);
                         //decoding JPEG in 1/4 region
                         //before render, raise the event to effect
-                        Bitmap GLsizeBmp=filter.onFRrender(i,mCapturedata,mCaptureWidth, mCaptureHeight);
-                        GLsizeBmp.copyPixelsToBuffer(mOputTexBuffer);
+                        //Bitmap GLsizeBmp=filter.onFRrender(i,mCapturedata,mCaptureWidth, mCaptureHeight);
+                        //GLsizeBmp.copyPixelsToBuffer(mOputTexBuffer);
                         //debug: make sure the image decoding is correct
                         //Util.RawToJpeg(mOputTexBuffer.array(), GLsizeBmp.getWidth(),GLsizeBmp.getHeight());
-                        int RS_width=GLsizeBmp.getWidth();
-                        int RS_height=GLsizeBmp.getHeight();
-                        Util.PiCoreLog("uploadFRTextureFromBuffer:w:"+RS_width+",h:"+RS_height);
+                        //int RS_width=GLsizeBmp.getWidth();
+                        //int RS_height=GLsizeBmp.getHeight();
+                        //Util.PiCoreLog("uploadFRTextureFromBuffer:w:"+RS_width+",h:"+RS_height);
                         //uploading the bmp to texture 01
-                        FR_tex=Util.uploadFRTextureFromBuffer(RS_width, RS_height, mOputTexBuffer,FR_tex);
-                        GLsizeBmp.recycle();
+                        //FR_tex=Util.uploadFRTextureFromBuffer(RS_width, RS_height, mOputTexBuffer,FR_tex);
+                        ByteBuffer bdata = ByteBuffer.wrap(mCapturedata);
+                        Bitmap bMap = BitmapFactory.decodeByteArray(mCapturedata,0,mCapturedata.length);
+                        bMap.copyPixelsToBuffer(mOputTexBuffer);
+                        FR_tex=Util.uploadFRTextureFromBuffer(mCaptureWidth, mCaptureHeight, mOputTexBuffer,FR_tex);
+                        //GLsizeBmp.recycle();
                         //GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
                         //GLES20.glm GLES20.GL_TEXTURE1
                         //rendering to screen
@@ -231,23 +237,23 @@ public class Renderer implements GLSurfaceView.Renderer {
                         GLES20.glFlush();
                         GLES20.glFinish();
                         //read from GL to buffer
-                        int t=(int) Math.sqrt(blocks);
+                        //int t=(int) Math.sqrt(blocks);
                         if(filter.getRenderPixels()==2)
                         {
-                            GLES20.glReadPixels(0, 0, mCaptureWidth/t,mCaptureHeight/t, GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, mOputTexBuffer);
+                            GLES20.glReadPixels(0, 0, mCaptureWidth,mCaptureHeight, GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, mOputTexBuffer);
                         }else
                         {
-                            GLES20.glReadPixels(0, 0, mCaptureWidth/t,mCaptureHeight/t, GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, mOputTexBuffer);
+                            GLES20.glReadPixels(0, 0, mCaptureWidth,mCaptureHeight, GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, mOputTexBuffer);
                         }
 
                         GLES20.glFinish();
-                        //Util.RawToJpeg(mOputTexBuffer.array(), mCaptureWidth/t,mCaptureHeight/t);
+                        //Util.RawToJpeg(mOputTexBuffer.array(), mCaptureWidth,mCaptureHeight);
                         //copy to map
 
                         //Util.RenderFullMapRawBuffer(mOputTexBuffer,i,mCaptureWidth/2,mCaptureHeight/2);
                         //mOputTexBuffer.clear();
                         //Util.RawToJpeg(mOputTexBuffer.array(), GLsizeBmp.getWidth(),GLsizeBmp.getHeight());
-                        filter.onRenderBlockDone(mOputTexBuffer, i);
+                        //filter.onRenderBlockDone(mOputTexBuffer, i);
 
                         //clear the texture
                         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
@@ -261,8 +267,9 @@ public class Renderer implements GLSurfaceView.Renderer {
                     filter.processEffect(mCapturedata, mCaptureWidth, mCaptureHeight);
                 }
 
-                filter.onFinalRender();
+                //filter.onFinalRender(mOputTexBuffer);
                 mCapturedata=null;
+                mListener.onRenderBufferDone(mOputTexBuffer);
                 Util.PiCoreLog("capturing done");
                 GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
                 //clear the color
@@ -288,7 +295,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         Shader currentShader=mFilters.getCurrnectFilter().filter_FR_shader;
 
         //GLES20.glViewport(0, 0, render_bmp.getWidth(), render_bmp.getHeight()); // set viewport to framebuffer size
-        GLES20.glViewport(0, 0, mCaptureWidth/2, mCaptureHeight/2); // set viewport to framebuffer size
+        GLES20.glViewport(0, 0, mCaptureWidth, mCaptureHeight); // set viewport to framebuffer size
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mFbBuffer[0]);
         GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, mFbRenderTex[0], 0);
         GLES20.glFramebufferRenderbuffer(GLES20.GL_FRAMEBUFFER, GLES20.GL_DEPTH_ATTACHMENT, GLES20.GL_RENDERBUFFER, mFbDepthRb[0]);
@@ -385,7 +392,10 @@ public class Renderer implements GLSurfaceView.Renderer {
 
             GLES20.glVertexAttribPointer(lTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, currentShader.getTextureVertices());
             GLES20.glEnableVertexAttribArray(lTexCoordHandle);
-            //GLES20.glEnableVertexAttribArray(lFrameTexCoordHandle);
+
+            //if(Util.getCapturing())
+            //   GLES20.glEnableVertexAttribArray(lFrameTexCoordHandle);
+
             Util.checkGlError("setup");
             GLES20.glEnableVertexAttribArray(lTriangleVerticesHandle);
             Util.checkGlError("setup");
@@ -464,8 +474,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     //Listener of renderer
 
     public interface RendererListener {
-        void onRenderBufferDone();
-
+        void onRenderBufferDone(ByteBuffer buffer);
         void onRenderSurfaceCreated(int textName);
         void onRenderDraw();
     }
