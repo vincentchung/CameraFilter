@@ -567,6 +567,8 @@ public class Util {
             {
                 frag="#define TILE_MODE 1\n"+getStringFromFileInAssets(mContext,fragmentSource);
             }
+
+
             vert=getStringFromFileInAssets(mContext,vertexSource);
         } catch (IOException e) {
             e.printStackTrace();
@@ -602,6 +604,8 @@ public class Util {
 
     public static void RawToJpeg(ByteBuffer src, ByteArrayOutputStream outputStream, int w, int h)
     {
+
+
         Bitmap bmp1=Bitmap.createBitmap(w, h, bmp_decoding_config);
         bmp1.copyPixelsFromBuffer(src);
 
@@ -667,7 +671,14 @@ public class Util {
         String filename;
         ByteBuffer bmap = ByteBuffer.wrap(data);
         Bitmap bmp1=Bitmap.createBitmap(w, h, bmp_decoding_config);
+        Matrix matrix = new Matrix();
+
+        //matrix.postRotate(180);
+        matrix.preScale(1.0f, -1.0f);
+
+
         bmp1.copyPixelsFromBuffer(bmap);
+        bmp1=Bitmap.createBitmap(bmp1,0,0,bmp1.getWidth(),bmp1.getHeight(),matrix,false);
 
 
         filename=generateFileName();

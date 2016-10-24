@@ -3,8 +3,10 @@ package com.Yamate.Camera;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
+import android.media.ExifInterface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -222,8 +224,18 @@ public class Renderer implements GLSurfaceView.Renderer {
                         //uploading the bmp to texture 01
                         //FR_tex=Util.uploadFRTextureFromBuffer(RS_width, RS_height, mOputTexBuffer,FR_tex);
                         ByteBuffer bdata = ByteBuffer.wrap(mCapturedata);
-                        Bitmap bMap = BitmapFactory.decodeByteArray(mCapturedata,0,mCapturedata.length);
+                        BitmapFactory.Options BO=new BitmapFactory.Options();
+                        BO.inPreferredConfig=Bitmap.Config.RGB_565;
+                        //BO.outHeight=mCaptureHeight;
+                        //BO.outWidth=mCaptureWidth;
+
+                        BO.inSampleSize=1;
+                        //BO.inSampleSize=1;
+                        Bitmap bMap = BitmapFactory.decodeByteArray(mCapturedata,0,mCapturedata.length,BO);
+
                         bMap.copyPixelsToBuffer(mOputTexBuffer);
+                        //Util.RawToJpeg(mOputTexBuffer.array(),bMap.getWidth(),bMap.getHeight());
+                        Util.PiCoreLog("capturing:w:"+bMap.getWidth()+",h:"+bMap.getHeight());
                         FR_tex=Util.uploadFRTextureFromBuffer(mCaptureWidth, mCaptureHeight, mOputTexBuffer,FR_tex);
                         //GLsizeBmp.recycle();
                         //GLES20.glActiveTexture(GLES20.GL_TEXTURE1);

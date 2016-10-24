@@ -248,7 +248,15 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
             ByteBuffer buffer = reader.acquireNextImage().getPlanes()[0].getBuffer();
 
             mCaptureBuffer = new byte[buffer.remaining()];
+
             buffer.get(mCaptureBuffer);
+
+            if(mYcameraOutputStream==null)
+                mYcameraOutputStream =new ByteArrayOutputStream();
+
+            mYcameraOutputStream.write(mCaptureBuffer,0,mCaptureBuffer.length);
+            Util.ImageToFile(mYcameraOutputStream);
+
             mFilterRenderer.setRenderToBuff(mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight(),mCaptureBuffer);
             Util.setCapturing(true);
             Util.PiCoreLog("onImageAvailable");
