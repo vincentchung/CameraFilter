@@ -196,60 +196,24 @@ public class Renderer implements GLSurfaceView.Renderer {
                 //using file path
                 //byte mCapturedata[]=mCamera.getCapturedBuffer();
 
-                if(mCapturedata==null)
+                //if(mCapturedata==null)
                 {
                     //keeping rendering VF mode
-                    normalRender(filter.filter_shader);
-                    //render2ndpassbuffer();
-                    return;
+                    //normalRender(filter.filter_shader);
+                    //return;
                 }
 
                 filter.onTakePicture(mCaptureWidth, mCaptureHeight);
 
                 if(filter.getGPUsupport())
                 {
-                    //int blocks=filter.getBlocknumber();
-                    //for(int i=1;i<(blocks+1);i++)
                     {
                         Util.PiCoreLog("capturing:w:"+mCaptureWidth+",h:"+mCaptureHeight);
-                        //decoding JPEG in 1/4 region
-                        //before render, raise the event to effect
-                        //Bitmap GLsizeBmp=filter.onFRrender(i,mCapturedata,mCaptureWidth, mCaptureHeight);
-                        //GLsizeBmp.copyPixelsToBuffer(mOputTexBuffer);
-                        //debug: make sure the image decoding is correct
-                        //Util.RawToJpeg(mOputTexBuffer.array(), GLsizeBmp.getWidth(),GLsizeBmp.getHeight());
-                        //int RS_width=GLsizeBmp.getWidth();
-                        //int RS_height=GLsizeBmp.getHeight();
-                        //Util.PiCoreLog("uploadFRTextureFromBuffer:w:"+RS_width+",h:"+RS_height);
-                        //uploading the bmp to texture 01
-                        //FR_tex=Util.uploadFRTextureFromBuffer(RS_width, RS_height, mOputTexBuffer,FR_tex);
-                        ByteBuffer bdata = ByteBuffer.wrap(mCapturedata);
-                        BitmapFactory.Options BO=new BitmapFactory.Options();
-                        BO.inPreferredConfig=Bitmap.Config.RGB_565;
-                        //BO.outHeight=mCaptureHeight;
-                        //BO.outWidth=mCaptureWidth;
-
-                        BO.inSampleSize=1;
-                        //BO.inSampleSize=1;
-                        Bitmap bMap = BitmapFactory.decodeByteArray(mCapturedata,0,mCapturedata.length,BO);
-
-                        bMap.copyPixelsToBuffer(mOputTexBuffer);
-                        //Util.RawToJpeg(mOputTexBuffer.array(),bMap.getWidth(),bMap.getHeight());
-                        Util.PiCoreLog("capturing:w:"+bMap.getWidth()+",h:"+bMap.getHeight());
                         FR_tex=Util.uploadFRTextureFromBuffer(mCaptureWidth, mCaptureHeight, mOputTexBuffer,FR_tex);
-                        //GLsizeBmp.recycle();
-                        //GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
-                        //GLES20.glm GLES20.GL_TEXTURE1
-                        //rendering to screen
-                        //render2ndpassbuffer();
-                        //rendering to FBO
                         renderToFramebuffer();
-                        //block function
-                        //make sure openGL done his job before reading pixel
                         GLES20.glFlush();
                         GLES20.glFinish();
                         //read from GL to buffer
-                        //int t=(int) Math.sqrt(blocks);
                         if(filter.getRenderPixels()==2)
                         {
                             GLES20.glReadPixels(0, 0, mCaptureWidth,mCaptureHeight, GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, mOputTexBuffer);
@@ -259,15 +223,6 @@ public class Renderer implements GLSurfaceView.Renderer {
                         }
 
                         GLES20.glFinish();
-                        //Util.RawToJpeg(mOputTexBuffer.array(), mCaptureWidth,mCaptureHeight);
-                        //copy to map
-
-                        //Util.RenderFullMapRawBuffer(mOputTexBuffer,i,mCaptureWidth/2,mCaptureHeight/2);
-                        //mOputTexBuffer.clear();
-                        //Util.RawToJpeg(mOputTexBuffer.array(), GLsizeBmp.getWidth(),GLsizeBmp.getHeight());
-                        //filter.onRenderBlockDone(mOputTexBuffer, i);
-
-                        //clear the texture
                         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
                         //clear the color
                         GLES20.glClearColor(.0f, .0f, .0f, 1.0f);
@@ -457,6 +412,13 @@ public class Renderer implements GLSurfaceView.Renderer {
         mCapturedata=data;
         mCaptureWidth=w;
         mCaptureHeight=h;
+    }
+
+    public void setRenderToBuff(Bitmap bMap)
+    {
+        mCaptureWidth=bMap.getWidth();
+        mCaptureHeight=bMap.getHeight();
+        bMap.copyPixelsToBuffer(mOputTexBuffer);
     }
 
     public boolean getRenderResult(ByteArrayOutputStream outputStream)

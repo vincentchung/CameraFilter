@@ -693,8 +693,6 @@ public class Util {
             outputStream = new FileOutputStream(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         bmp1.compress(Bitmap.CompressFormat.JPEG, 85, outputStream);
         bmp1.recycle();

@@ -6,6 +6,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.ImageReader;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -149,8 +151,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
 
     @Override
     public void onRenderBufferDone(ByteBuffer buffer) {
-        //mYcameraOutputStream.write(mCaptureBuffer,0,mCaptureBuffer.length);
-        mCaptureBuffer=null;
+        //mYcameraOutputStream.w
         Util.RawToJpeg(buffer.array(),mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight());
     }
 
@@ -257,7 +258,18 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
             mYcameraOutputStream.write(mCaptureBuffer,0,mCaptureBuffer.length);
             Util.ImageToFile(mYcameraOutputStream);
 
-            mFilterRenderer.setRenderToBuff(mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight(),mCaptureBuffer);
+            BitmapFactory.Options BO=new BitmapFactory.Options();
+            BO.inPreferredConfig= Bitmap.Config.RGB_565;
+            //BO.outHeight=mCaptureHeight;
+            //BO.outWidth=mCaptureWidth;
+
+            BO.inSampleSize=1;
+            //BO.inSampleSize=1;
+            Bitmap bMap = BitmapFactory.decodeByteArray(mCaptureBuffer,0,mCaptureBuffer.length,BO);
+
+            //bMap.copyPixelsToBuffer(mOputTexBuffer);
+            //decode to bmp format
+            mFilterRenderer.setRenderToBuff(bMap);
             Util.setCapturing(true);
             Util.PiCoreLog("onImageAvailable");
             //mWaitingProcessPic++;
