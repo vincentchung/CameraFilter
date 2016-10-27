@@ -84,7 +84,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
                 if(mYcameraOutputStream==null)
                     mYcameraOutputStream =new ByteArrayOutputStream();
 
-                Util.setCapturing(true);
+                //Util.setCapturing(true);
                 //FilterRenderer.TakePicture();
                 //taking a capturing...
                 mCamera.takePicture();
@@ -158,8 +158,8 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
 
     @Override
     public void onRenderBufferDone(ByteBuffer buffer) {
-        //mYcameraOutputStream.w
-        Util.RawToJpeg(buffer.array(),mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight(),mExifJpeg);
+        Util.RawToJpeg(buffer.array(),mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight());
+        //Util.RawToJpeg(buffer.array(),mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight(),mExifJpeg);
 
     }
 
@@ -263,14 +263,19 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
                 mYcameraOutputStream =new ByteArrayOutputStream();
 
             mYcameraOutputStream.write(mCaptureBuffer,0,mCaptureBuffer.length);
-            Util.ImageToFile(mYcameraOutputStream);
+            //Util.ImageToFile(mYcameraOutputStream);
+
 
 
             try {
-                mExifJpeg=new ExifInterface(new ByteArrayInputStream(mCaptureBuffer));
+                mExifJpeg=new ExifInterface(Util.ImageToFile(mYcameraOutputStream));
+                //mYcameraOutputStream.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            Util.PiCoreLog("mExifJpeg:"+mExifJpeg.toString());
+            //mYcameraOutputStream=null;
 
             BitmapFactory.Options BO=new BitmapFactory.Options();
             BO.inPreferredConfig= Bitmap.Config.RGB_565;

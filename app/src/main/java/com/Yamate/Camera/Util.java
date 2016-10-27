@@ -701,21 +701,37 @@ public class Util {
     }
 
     private static void CopyExif(ExifInterface source,ExifInterface target) {
+        if(source.getAttribute(ExifInterface.TAG_IMAGE_LENGTH)!=null)
             target.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, source.getAttribute(ExifInterface.TAG_IMAGE_LENGTH));
+        if(source.getAttribute(ExifInterface.TAG_IMAGE_WIDTH)!=null)
             target.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, source.getAttribute(ExifInterface.TAG_IMAGE_WIDTH));
+        if(source.getAttribute(ExifInterface.TAG_DATETIME)!=null)
             target.setAttribute(ExifInterface.TAG_DATETIME, source.getAttribute(ExifInterface.TAG_DATETIME));
+        if(source.getAttribute(ExifInterface.TAG_MAKE)!=null)
             target.setAttribute(ExifInterface.TAG_MAKE, source.getAttribute(ExifInterface.TAG_MAKE));
+        if(source.getAttribute(ExifInterface.TAG_MODEL)!=null)
             target.setAttribute(ExifInterface.TAG_MODEL, source.getAttribute(ExifInterface.TAG_MODEL));
+        if(source.getAttribute(ExifInterface.TAG_ORIENTATION)!=null)
             target.setAttribute(ExifInterface.TAG_ORIENTATION, source.getAttribute(ExifInterface.TAG_ORIENTATION));
+        if(source.getAttribute(ExifInterface.TAG_WHITE_BALANCE)!=null)
             target.setAttribute(ExifInterface.TAG_WHITE_BALANCE, source.getAttribute(ExifInterface.TAG_WHITE_BALANCE));
+        if(source.getAttribute(ExifInterface.TAG_FOCAL_LENGTH)!=null)
             target.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, source.getAttribute(ExifInterface.TAG_FOCAL_LENGTH));
+        if(source.getAttribute(ExifInterface.TAG_FLASH)!=null)
             target.setAttribute(ExifInterface.TAG_FLASH, source.getAttribute(ExifInterface.TAG_FLASH));
+        if(source.getAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD)!=null)
             target.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, source.getAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD));
+        if(source.getAttribute(ExifInterface.TAG_GPS_DATESTAMP)!=null)
             target.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, source.getAttribute(ExifInterface.TAG_GPS_DATESTAMP));
+        if(source.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP)!=null)
             target.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, source.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP));
+        if(source.getAttribute(ExifInterface.TAG_GPS_LATITUDE)!=null)
             target.setAttribute(ExifInterface.TAG_GPS_LATITUDE, source.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+        if(source.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF)!=null)
             target.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF,source.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
+        if(source.getAttribute(ExifInterface.TAG_GPS_LONGITUDE)!=null)
             target.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, source.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
+        if(source.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF)!=null)
             target.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF,source.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF));
     }
     public static String RawToJpeg(byte[] data, int w, int h, ExifInterface exittag)
@@ -745,6 +761,9 @@ public class Util {
             e.printStackTrace();
         }
         //adding exif data
+        if(exittag==null)
+            PiCoreLog("exif is null");
+
         try {
             ExifInterface addexif =new ExifInterface(file.getAbsolutePath());
             CopyExif(exittag,addexif);

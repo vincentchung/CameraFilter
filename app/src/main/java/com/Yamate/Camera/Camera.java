@@ -132,12 +132,12 @@ public class Camera {
     /**
      * Max preview width that is guaranteed by Camera2 API
      */
-    private static final int MAX_PREVIEW_WIDTH = 1920;
+    private static final int CAPTURE_WIDTH = 1920;
 
     /**
      * Max preview height that is guaranteed by Camera2 API
      */
-    private static final int MAX_PREVIEW_HEIGHT = 1080;
+    private static final int CAPTURE_HEIGHT = 1080;
 
     private byte[] captureBuffer = null;
 
@@ -147,6 +147,22 @@ public class Camera {
         mTextureID = textureID;
         mFile = new File(mActivity.getExternalFilesDir(null), "pic.jpg");
     }
+
+    /*
+    *
+    * note5 support capturing size
+    * 10-27 16:18:17.347 12913-13068/camera.yamate.com.camerafilter D/Camera2BasicFragment: 3264x2448
+10-27 16:18:17.347 12913-13068/camera.yamate.com.camerafilter D/Camera2BasicFragment: 3264x1836
+10-27 16:18:17.347 12913-13068/camera.yamate.com.camerafilter D/Camera2BasicFragment: 2048x1152
+10-27 16:18:17.347 12913-13068/camera.yamate.com.camerafilter D/Camera2BasicFragment: 1920x1080
+10-27 16:18:17.347 12913-13068/camera.yamate.com.camerafilter D/Camera2BasicFragment: 1280x720
+10-27 16:18:17.347 12913-13068/camera.yamate.com.camerafilter D/Camera2BasicFragment: 960x720
+10-27 16:18:17.347 12913-13068/camera.yamate.com.camerafilter D/Camera2BasicFragment: 640x480
+10-27 16:18:17.347 12913-13068/camera.yamate.com.camerafilter D/Camera2BasicFragment: 320x240
+10-27 16:18:17.347 12913-13068/camera.yamate.com.camerafilter D/Camera2BasicFragment: 256x144
+
+    *
+    * */
 
     /**
      * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a
@@ -556,16 +572,12 @@ public class Camera {
                 }
                 Util.PiCoreLog("mPreviewSize w:"+mPreviewSize.getWidth()+",h:"+mPreviewSize.getHeight());
 
-                //using preview size to take image
-
-                Size largest = Collections.max(
-                        Arrays.asList(map.getOutputSizes(ImageFormat.JPEG)),
-                        new CompareSizesByArea());
-                mImageReader = ImageReader.newInstance(mPreviewSize.getWidth(), mPreviewSize.getHeight(),
+                mCaptureSize=new Size(CAPTURE_WIDTH, CAPTURE_HEIGHT);
+                mImageReader = ImageReader.newInstance(mCaptureSize.getWidth(), mCaptureSize.getHeight(),
                         ImageFormat.JPEG, 2);
                 mImageReader.setOnImageAvailableListener(
                         mOnImageAvailableListener, mBackgroundHandler);
-                mCaptureSize=new Size(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+
                 // We fit the aspect ratio of TextureView to the size of preview we picked.
                 /*
                 int orientation = getResources().getConfiguration().orientation;
@@ -835,8 +847,8 @@ public class Camera {
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
-                    showToast("Saved: " + mFile);
-                    Log.d(TAG, mFile.toString());
+                    //showToast("Saved: " + mFile);
+                    //Log.d(TAG, mFile.toString());
                     unlockFocus();
                 }
             };
