@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.media.ImageReader;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -23,10 +24,13 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import android.support.v13.app.FragmentCompat;
@@ -44,6 +48,9 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String FRAGMENT_DIALOG = "dialog";
     private byte mCaptureBuffer[]=null;
+
+    //exif data for capturing jpeg..
+    ExifInterface mExifJpeg=null;
 
 
     @Override
@@ -152,14 +159,14 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
     @Override
     public void onRenderBufferDone(ByteBuffer buffer) {
         //mYcameraOutputStream.w
-        Util.RawToJpeg(buffer.array(),mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight());
+        Util.RawToJpeg(buffer.array(),mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight(),mExifJpeg);
+
     }
 
     @Override
     public void onRenderSurfaceCreated(int textName) {
         mCamera = new Camera(this, textName);
         mCamera.setCaptueImageListener(mOnCameraImageAvailableListener);
-
         mCamera.open();
 
     }
@@ -257,6 +264,13 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
 
             mYcameraOutputStream.write(mCaptureBuffer,0,mCaptureBuffer.length);
             Util.ImageToFile(mYcameraOutputStream);
+
+
+            try {
+                mExifJpeg=new ExifInterface(new ByteArrayInputStream(mCaptureBuffer));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             BitmapFactory.Options BO=new BitmapFactory.Options();
             BO.inPreferredConfig= Bitmap.Config.RGB_565;

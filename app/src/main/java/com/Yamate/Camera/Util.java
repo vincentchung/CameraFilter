@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.opengl.GLES20;
 import android.util.Log;
 import android.widget.Toast;
@@ -672,14 +673,10 @@ public class Util {
         ByteBuffer bmap = ByteBuffer.wrap(data);
         Bitmap bmp1=Bitmap.createBitmap(w, h, bmp_decoding_config);
         Matrix matrix = new Matrix();
-
         //matrix.postRotate(180);
         matrix.preScale(1.0f, -1.0f);
-
-
         bmp1.copyPixelsFromBuffer(bmap);
         bmp1=Bitmap.createBitmap(bmp1,0,0,bmp1.getWidth(),bmp1.getHeight(),matrix,false);
-
 
         filename=generateFileName();
 
@@ -696,6 +693,65 @@ public class Util {
         }
         bmp1.compress(Bitmap.CompressFormat.JPEG, 85, outputStream);
         bmp1.recycle();
+
+        return file.getAbsolutePath();
+        //MediaScannerNotifier m=new MediaScannerNotifier(mContext,file.getAbsolutePath(),"image/jpg");
+        //m.onMediaScannerConnected();
+
+    }
+
+    private static void CopyExif(ExifInterface source,ExifInterface target) {
+            target.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, source.getAttribute(ExifInterface.TAG_IMAGE_LENGTH));
+            target.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, source.getAttribute(ExifInterface.TAG_IMAGE_WIDTH));
+            target.setAttribute(ExifInterface.TAG_DATETIME, source.getAttribute(ExifInterface.TAG_DATETIME));
+            target.setAttribute(ExifInterface.TAG_MAKE, source.getAttribute(ExifInterface.TAG_MAKE));
+            target.setAttribute(ExifInterface.TAG_MODEL, source.getAttribute(ExifInterface.TAG_MODEL));
+            target.setAttribute(ExifInterface.TAG_ORIENTATION, source.getAttribute(ExifInterface.TAG_ORIENTATION));
+            target.setAttribute(ExifInterface.TAG_WHITE_BALANCE, source.getAttribute(ExifInterface.TAG_WHITE_BALANCE));
+            target.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, source.getAttribute(ExifInterface.TAG_FOCAL_LENGTH));
+            target.setAttribute(ExifInterface.TAG_FLASH, source.getAttribute(ExifInterface.TAG_FLASH));
+            target.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, source.getAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD));
+            target.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, source.getAttribute(ExifInterface.TAG_GPS_DATESTAMP));
+            target.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, source.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP));
+            target.setAttribute(ExifInterface.TAG_GPS_LATITUDE, source.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+            target.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF,source.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
+            target.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, source.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
+            target.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF,source.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF));
+    }
+    public static String RawToJpeg(byte[] data, int w, int h, ExifInterface exittag)
+    {
+        String filename;
+        ByteBuffer bmap = ByteBuffer.wrap(data);
+        Bitmap bmp1=Bitmap.createBitmap(w, h, bmp_decoding_config);
+        filename=generateFileName();
+
+        File dir = new File(STORE_DIR);
+        OutputStream outputStream = null;
+        File file = null;
+        if (!dir.exists())
+            dir.mkdirs();
+        file = new File(dir, filename);
+        try {
+            outputStream = new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        bmp1.compress(Bitmap.CompressFormat.JPEG, 85, outputStream);
+        bmp1.recycle();
+
+        try {
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //adding exif data
+        try {
+            ExifInterface addexif =new ExifInterface(file.getAbsolutePath());
+            CopyExif(exittag,addexif);
+            addexif.saveAttributes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return file.getAbsolutePath();
         //MediaScannerNotifier m=new MediaScannerNotifier(mContext,file.getAbsolutePath(),"image/jpg");
