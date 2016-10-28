@@ -30,7 +30,7 @@ public class Halftone extends Filter {
 
     @Override
     public void onFRInit() {
-
+        Util.setShaderVariableF(mFRGLProgram, "u_dots", 64.0f);
     }
 
     @Override
