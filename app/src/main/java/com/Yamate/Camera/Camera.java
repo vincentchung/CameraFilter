@@ -132,12 +132,12 @@ public class Camera {
     /**
      * Max preview width that is guaranteed by Camera2 API
      */
-    private static final int CAPTURE_WIDTH = 1920;
+    private static final int CAPTURE_WIDTH = 2048;//1920;
 
     /**
      * Max preview height that is guaranteed by Camera2 API
      */
-    private static final int CAPTURE_HEIGHT = 1080;
+    private static final int CAPTURE_HEIGHT = 1152;//1080;
 
     private byte[] captureBuffer = null;
 
