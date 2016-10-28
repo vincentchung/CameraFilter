@@ -7,6 +7,10 @@ import com.Yamate.Camera.Util;
 
 public class Duocolor extends Filter {
 
+    public float mKeyColorR=0.0f;
+    public float mKeyColorG=0.0f;
+    public float mKeyColorB=0.0f;
+
     public Duocolor(int w, int h) {
         super(w, h);
         //pic_filter_id=FragmentShaders.FILTER_NONE;
@@ -21,9 +25,9 @@ public class Duocolor extends Filter {
         filter_shader.init_commitResource();
         mGLProgram=filter_shader.getGLProgram();
 
-        Util.setShaderVariableF(mGLProgram, "u_keyColorR", 1.0f);
-        Util.setShaderVariableF(mGLProgram, "u_keyColorG", 0.0f);
-        Util.setShaderVariableF(mGLProgram, "u_keyColorB", 0.0f);
+        Util.setShaderVariableF(mGLProgram, "u_keyColorR", mKeyColorR);
+        Util.setShaderVariableF(mGLProgram, "u_keyColorG", mKeyColorG);
+        Util.setShaderVariableF(mGLProgram, "u_keyColorB", mKeyColorB);
         Util.setShaderVariableF(mGLProgram, "u_threshold", 0.8f); // 0.345f);
         Util.setShaderVariableF(mGLProgram, "u_slope", 0.8f); // 0.5f);
         //GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
@@ -31,17 +35,6 @@ public class Duocolor extends Filter {
     }
     @Override
     public void onInit() {
-
-
-/*
-        VERTEX_SHADER=VertexShaders.SIMPLE_VERTEX_SHADER;
-        FRAGMENT_SHADER=FragmentShaders.SIMPLE_FRAGMENT_SHADER;
-        mVertexShader=VertexShaders.mSimpleVertexShader;
-        mFRVertexShader=VertexShaders.mFRSimpleVertexShader;
-        //mVertexShader = Util.loadShader(GLES20.GL_VERTEX_SHADER, FragmentShaders.VF_DEFINE+VertexShaders.SIMPLE_VERTEX_SHADER);
-
-        mPixelShader = Util.loadShader(GLES20.GL_FRAGMENT_SHADER, FragmentShaders.VF_DEFINE+FragmentShaders.SIMPLE_FRAGMENT_SHADER);
-        */
         init();
     }
 

@@ -231,6 +231,7 @@ public class Renderer implements GLSurfaceView.Renderer {
                     }
                 }else
                 {
+                    ///TBD:using sw algo to do the filter effect
                     filter.processEffect(mCapturedata, mCaptureWidth, mCaptureHeight);
                 }
 
