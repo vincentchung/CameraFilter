@@ -39,6 +39,15 @@ public class Duocolor extends Filter {
     }
 
     @Override
+    public void onFRInit() {
+        Util.setShaderVariableF(mFRGLProgram, "u_keyColorR", mKeyColorR);
+        Util.setShaderVariableF(mFRGLProgram, "u_keyColorG", mKeyColorG);
+        Util.setShaderVariableF(mFRGLProgram, "u_keyColorB", mKeyColorB);
+        Util.setShaderVariableF(mFRGLProgram, "u_threshold", 0.8f); // 0.345f);
+        Util.setShaderVariableF(mFRGLProgram, "u_slope", 0.8f); // 0.5f)
+    }
+
+    @Override
     public void onSelected() {
         // TODO Auto-generated method stub
 

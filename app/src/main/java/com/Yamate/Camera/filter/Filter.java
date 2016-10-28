@@ -39,6 +39,7 @@ public abstract class Filter {
     String mFramgment_FR_glsl="normal_fragment_shader_full.glsl";
 
 	public abstract void onInit();
+    public abstract void onFRInit();
 	public abstract void onSelected();
 
 	public int getBlocknumber()
@@ -92,21 +93,17 @@ public abstract class Filter {
 	public void init_FR()
 	{
 		Util.PiCoreLog("init_FR");
-		//if(mVertexShader!=0)
 		{
 			filter_FR_shader=new Shader();
 			filter_FR_shader.setVF(false);
             filter_FR_shader.init(mVertext_glsl,mFramgment_glsl);
-			//filter_FR_shader.init(
-			//		mFRVertexShader,
-			//				Util.loadShader(GLES20.GL_FRAGMENT_SHADER, FragmentShaders.FR_DEFINE+FRAGMENT_SHADER)
-			//				,false,pic_filter_id);
 			filter_FR_shader.init_commitResource();
 
 			mFRGLProgram=filter_FR_shader.getGLProgram();
 			filter_FR_shader.setVF(false);
 			Util.setShaderVariableF(mFRGLProgram, "u_texelHeight", lVFTexelHeight);
             Util.setShaderVariableF(mFRGLProgram, "u_texelWidth", lVFTexelWidth);
+            onFRInit();
 		}
 	}
 

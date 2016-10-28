@@ -34,6 +34,13 @@ public class Emboss extends Filter {
     }
 
     @Override
+    public void onFRInit() {
+        Util.setShaderVariableF(mFRGLProgram, "u_tintR", 0.0f);
+        Util.setShaderVariableF(mFRGLProgram, "u_tintG", 0.0f);
+        Util.setShaderVariableF(mFRGLProgram, "u_tintB", 0.3f);
+    }
+
+    @Override
     public void onSelected() {
         // TODO Auto-generated method stub
 

@@ -25,6 +25,11 @@ public class Hue extends Filter {
     }
 
     @Override
+    public void onFRInit() {
+
+    }
+
+    @Override
     public void onSelected() {
         // TODO Auto-generated method stub
 

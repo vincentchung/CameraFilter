@@ -29,6 +29,11 @@ public class Cartoon extends Filter {
     }
 
     @Override
+    public void onFRInit() {
+
+    }
+
+    @Override
     public void onSelected() {
         // TODO Auto-generated method stub
 
