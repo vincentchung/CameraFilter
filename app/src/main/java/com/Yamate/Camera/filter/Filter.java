@@ -42,6 +42,15 @@ public abstract class Filter {
     public abstract void onFRInit();
 	public abstract void onSelected();
 
+    public void init()
+    {
+        filter_shader=new Shader();
+        filter_shader.init(mVertext_glsl,mFramgment_glsl);
+        //int handle1=filter_shader.init_addtexName("s_capturingtexture");
+        filter_shader.init_commitResource();
+        mGLProgram=filter_shader.getGLProgram();
+    }
+
 	public int getBlocknumber()
 	{
 		return mSupport_blocks;
@@ -77,6 +86,7 @@ public abstract class Filter {
 	{
         if(filter_shader==null)
         {
+            init();
         	onInit();
         	GLES20.glFlush();
             mGLProgram=filter_shader.getGLProgram();
@@ -116,27 +126,6 @@ public abstract class Filter {
 	{
 		Height=h;
 		Width=w;
-		
-		//load_all_gl();
-		
-		//init the capturing textture in all filter
-/*
-		onInit();
-		float lTexelHeight = 1.0f/Height; // screen resolution, not viewfinder resolution!
-        float lTexelWidth = 1.0f/Width;
-        if(filter_shader!=null)
-        {
-        	mGLProgram=filter_shader.getGLProgram();
-            if(mGLProgram!=0)
-            {
-            	Util.setShaderVariableF(mGLProgram, "u_texelHeight", lTexelHeight);
-                Util.checkGlError("u_texelWidth and u_texelHeight");
-                Util.setShaderVariableF(mGLProgram, "u_texelWidth", lTexelWidth);
-                Util.checkGlError("u_texelWidth and u_texelHeight");
-            }
-            GLES20.glFlush();
-        }
-  */     
         
 	}
 	

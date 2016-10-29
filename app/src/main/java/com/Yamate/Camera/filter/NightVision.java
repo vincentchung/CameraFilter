@@ -12,7 +12,7 @@ public class NightVision extends Filter {
         int res_id=(Integer)arg;
         mNoise_id=res_id;
     }
-    void init()
+    public void init()
     {
         mFramgment_glsl="nightvision_fragment_shader.glsl";
         filter_shader=new Shader();

@@ -12,20 +12,10 @@ public class Cyan extends Filter {
 
     public Cyan(int w, int h) {
         super(w, h);
-    }
-    void init()
-    {
         mFramgment_glsl="cyan_fragment_shader.glsl";
-        filter_shader=new Shader();
-        filter_shader.setVF(true);
-        filter_shader.init(mVertext_glsl,mFramgment_glsl);
-        filter_shader.init_commitResource();
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
     }
     @Override
     public void onInit() {
-
-        init();
     }
 
     @Override

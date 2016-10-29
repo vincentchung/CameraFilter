@@ -14,7 +14,7 @@ public class Normal extends Filter {
         //pic_filter_id=FragmentShaders.FILTER_NONE;
         // TODO Auto-generated constructor stub
     }
-    void init()
+    public void init()
     {
         filter_shader=new Shader();
         filter_shader.init(mVertext_glsl,mFramgment_glsl);

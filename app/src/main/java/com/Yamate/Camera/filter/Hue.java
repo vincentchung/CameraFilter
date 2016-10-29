@@ -10,7 +10,7 @@ public class Hue extends Filter {
     public Hue(int w, int h) {
         super(w, h);
     }
-    void init()
+    public void init()
     {
         mFramgment_glsl="hue_fragment_shader.glsl";
         filter_shader=new Shader();
