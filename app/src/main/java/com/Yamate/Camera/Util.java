@@ -79,8 +79,11 @@ public class Util {
     private static final String STORE_DIR = "/mnt/sdcard/DCIM/Yamate";
 
     public static void PiCoreLog(String txt) {
-        int threadID = android.os.Process.myTid();
-        Log.v(TAG + " " + android.os.Process.myTid(), txt);
+
+        //formal release without log
+        //int threadID = android.os.Process.myTid();
+        //Log.v(TAG + " " + android.os.Process.myTid(), txt);
+
     }
 
     public static void setContext(Context context)

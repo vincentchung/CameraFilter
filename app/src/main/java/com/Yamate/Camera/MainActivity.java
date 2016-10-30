@@ -46,6 +46,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
 
     //adding premission request
     private static final int REQUEST_CAMERA_PERMISSION = 1;
+    private static final int REQUEST_WRITE_EX_PERMISSION = 2;
     private static final String FRAGMENT_DIALOG = "dialog";
     private byte mCaptureBuffer[]=null;
 
@@ -63,6 +64,12 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             requestCameraPermission();
+            return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestWriteEXPermission();
             return;
         }
 
@@ -143,10 +150,34 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
         // END_INCLUDE(camera_permission_request)
     }
 
+    private void requestWriteEXPermission() {
+
+        // BEGIN_INCLUDE(camera_permission_request)
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            // Provide an additional rationale to the user if the permission was not granted
+            // and the user would benefit from additional context for the use of the permission.
+            // For example if the user has previously denied the permission.
+            new ConfirmationWEDialog().show(getFragmentManager(), FRAGMENT_DIALOG);
+
+        } else {
+
+            // Camera permission has not been granted yet. Request it directly.
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_WRITE_EX_PERMISSION);
+        }
+        // END_INCLUDE(camera_permission_request)
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                ErrorDialog.newInstance(getString(R.string.request_permission))
+                        .show(getFragmentManager(),FRAGMENT_DIALOG);
+            }
+        }else if (requestCode == REQUEST_WRITE_EX_PERMISSION) {
             if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 ErrorDialog.newInstance(getString(R.string.request_permission))
                         .show(getFragmentManager(),FRAGMENT_DIALOG);
@@ -231,6 +262,33 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
                         public void onClick(DialogInterface dialog, int which) {
                             ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.CAMERA},
                             REQUEST_CAMERA_PERMISSION);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Activity activity = getActivity();
+                                    if (activity != null) {
+                                        activity.finish();
+                                    }
+                                }
+                            })
+                    .create();
+        }
+    }
+
+    public static class ConfirmationWEDialog extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return new AlertDialog.Builder(getActivity())
+                    .setMessage(R.string.request_permission)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    REQUEST_WRITE_EX_PERMISSION);
                         }
                     })
                     .setNegativeButton(android.R.string.cancel,
