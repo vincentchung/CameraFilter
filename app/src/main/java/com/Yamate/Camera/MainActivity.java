@@ -1,11 +1,6 @@
 package com.Yamate.Camera;
 
-import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
@@ -13,65 +8,36 @@ import android.media.ImageReader;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v13.app.ActivityCompat;
-import android.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.Toast;
-
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import android.support.v13.app.FragmentCompat;
-
-public class MainActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback, Renderer.RendererListener{
+public class MainActivity extends Activity implements Renderer.RendererListener{
     private GLSurfaceView mView;
     private Renderer mFilterRenderer=null;
     private static ByteArrayOutputStream mYcameraOutputStream=null;
-    private final Handler mHandler = new Handler();
     private Camera mCamera;
     private boolean mCameraInit=false;
     private FilterList filters=null;
 
-    //adding premission request
-    private static final int REQUEST_CAMERA_PERMISSION = 1;
-    private static final int REQUEST_WRITE_EX_PERMISSION = 2;
-    private static final String FRAGMENT_DIALOG = "dialog";
+
     private byte mCaptureBuffer[]=null;
 
     //exif data for capturing jpeg..
     ExifInterface mExifJpeg=null;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        //super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
 
         //adding premission request
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestCameraPermission();
-            return;
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestWriteEXPermission();
-            return;
-        }
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         mView = (GLSurfaceView)findViewById(R.id.gl_surface_view);
         mView.setEGLContextClientVersion(2);
@@ -80,7 +46,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
         mView.setRenderer(mFilterRenderer);
 
 
-        Util.PiCoreLog("view w:"+mView.getWidth()+",h:"+mView.getHeight());
+        //Util.PiCoreLog("view w:"+mView.getWidth()+",h:"+mView.getHeight());
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -91,9 +57,6 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
                 if(mYcameraOutputStream==null)
                     mYcameraOutputStream =new ByteArrayOutputStream();
 
-                //Util.setCapturing(true);
-                //FilterRenderer.TakePicture();
-                //taking a capturing...
                 mCamera.takePicture();
             }
         });
@@ -128,65 +91,6 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
     }
 
 
-
-    //for adding premission request
-
-    private void requestCameraPermission() {
-
-        // BEGIN_INCLUDE(camera_permission_request)
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.CAMERA)) {
-            // Provide an additional rationale to the user if the permission was not granted
-            // and the user would benefit from additional context for the use of the permission.
-            // For example if the user has previously denied the permission.
-            new ConfirmationDialog().show(getFragmentManager(), FRAGMENT_DIALOG);
-
-        } else {
-
-            // Camera permission has not been granted yet. Request it directly.
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
-                    REQUEST_CAMERA_PERMISSION);
-        }
-        // END_INCLUDE(camera_permission_request)
-    }
-
-    private void requestWriteEXPermission() {
-
-        // BEGIN_INCLUDE(camera_permission_request)
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            // Provide an additional rationale to the user if the permission was not granted
-            // and the user would benefit from additional context for the use of the permission.
-            // For example if the user has previously denied the permission.
-            new ConfirmationWEDialog().show(getFragmentManager(), FRAGMENT_DIALOG);
-
-        } else {
-
-            // Camera permission has not been granted yet. Request it directly.
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_WRITE_EX_PERMISSION);
-        }
-        // END_INCLUDE(camera_permission_request)
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                ErrorDialog.newInstance(getString(R.string.request_permission))
-                        .show(getFragmentManager(),FRAGMENT_DIALOG);
-            }
-        }else if (requestCode == REQUEST_WRITE_EX_PERMISSION) {
-            if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                ErrorDialog.newInstance(getString(R.string.request_permission))
-                        .show(getFragmentManager(),FRAGMENT_DIALOG);
-            }
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
-
     @Override
     public void onRenderBufferDone(ByteBuffer buffer) {
         Util.RawToJpeg(buffer.array(),mCamera.getCaptureSize().getWidth(),mCamera.getCaptureSize().getHeight());
@@ -196,6 +100,8 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
 
     @Override
     public void onRenderSurfaceCreated(int textName) {
+
+
         mCamera = new Camera(this, textName);
         mCamera.setCaptueImageListener(mOnCameraImageAvailableListener);
         mCamera.open();
@@ -215,93 +121,6 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
                 mFilterRenderer.setCameraConfig(true);
                 mCameraInit=true;
             }
-        }
-    }
-
-    /**
-     * Shows an error message dialog.
-     */
-    public static class ErrorDialog extends DialogFragment {
-
-        private static final String ARG_MESSAGE = "message";
-
-        public static ErrorDialog newInstance(String message) {
-            ErrorDialog dialog = new ErrorDialog();
-            Bundle args = new Bundle();
-            args.putString(ARG_MESSAGE, message);
-            dialog.setArguments(args);
-            return dialog;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final Activity activity = getActivity();
-            return new AlertDialog.Builder(activity)
-                    .setMessage(getArguments().getString(ARG_MESSAGE))
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            activity.finish();
-                        }
-                    })
-                    .create();
-        }
-
-    }
-    /**
-     * Shows OK/Cancel confirmation dialog about camera permission.
-     */
-    public static class ConfirmationDialog extends DialogFragment {
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return new AlertDialog.Builder(getActivity())
-                    .setMessage(R.string.request_permission)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.CAMERA},
-                            REQUEST_CAMERA_PERMISSION);
-                        }
-                    })
-                    .setNegativeButton(android.R.string.cancel,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Activity activity = getActivity();
-                                    if (activity != null) {
-                                        activity.finish();
-                                    }
-                                }
-                            })
-                    .create();
-        }
-    }
-
-    public static class ConfirmationWEDialog extends DialogFragment {
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return new AlertDialog.Builder(getActivity())
-                    .setMessage(R.string.request_permission)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                    REQUEST_WRITE_EX_PERMISSION);
-                        }
-                    })
-                    .setNegativeButton(android.R.string.cancel,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Activity activity = getActivity();
-                                    if (activity != null) {
-                                        activity.finish();
-                                    }
-                                }
-                            })
-                    .create();
         }
     }
 
@@ -353,5 +172,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
         }
 
     };
+
+
 
 }
