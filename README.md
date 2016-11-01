@@ -17,7 +17,7 @@ For handling camera setting and preview/capturing image size.
 I had provides more working node in my [wordpress blog][3].
 
 [1]: https://github.com/googlesamples/android-Camera2Basic
-[2]: https://play.google.com/store/apps/details?id=com.yamate.camera
+[2]: https://play.google.com/store/apps/details?id=com.yamate.camerafilter
 [3]: https://vincentcwblog.wordpress.com/category/tech/
 
 
