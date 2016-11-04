@@ -256,6 +256,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         //render to viewfinder
         normalRender(filter.filter_shader);
 
+        mSurfaceTexture.
     }
 
     private boolean renderToFramebuffer() {
@@ -406,6 +407,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     public void setSurfaceTexture(SurfaceTexture surf)
     {
         mSurfaceTexture=surf;
+
     }
 
     public void setRenderToBuff(int w,int h,byte data[])

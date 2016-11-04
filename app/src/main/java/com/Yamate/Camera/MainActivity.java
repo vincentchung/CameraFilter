@@ -24,11 +24,12 @@ public class MainActivity extends Activity implements Renderer.RendererListener{
     private boolean mCameraInit=false;
     private FilterList filters=null;
 
-
     private byte mCaptureBuffer[]=null;
 
     //exif data for capturing jpeg..
     ExifInterface mExifJpeg=null;
+    //camcorder
+    private boolean mIsRecordingVideo=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,10 +55,21 @@ public class MainActivity extends Activity implements Renderer.RendererListener{
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                /*
                 if(mYcameraOutputStream==null)
                     mYcameraOutputStream =new ByteArrayOutputStream();
 
                 mCamera.takePicture();
+                */
+
+                if (mIsRecordingVideo) {
+                    mIsRecordingVideo=false;
+                    mCamera.stopRecordingVideo();
+                } else {
+                    mIsRecordingVideo=true;
+                    mCamera.startRecordingVideo();
+                }
+
             }
         });
     }
