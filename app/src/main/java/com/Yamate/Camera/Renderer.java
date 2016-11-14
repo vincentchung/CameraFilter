@@ -256,7 +256,6 @@ public class Renderer implements GLSurfaceView.Renderer {
         //render to viewfinder
         normalRender(filter.filter_shader);
 
-        mSurfaceTexture.
     }
 
     private boolean renderToFramebuffer() {
